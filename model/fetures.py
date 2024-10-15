@@ -1,5 +1,5 @@
 def all_user_data(*,cursor,user_id = None):
-    query = f"SELECT user_id,name,email,role FROM userdata {f"WHERE user_id = {user_id}" if user_id is not None else ""};"
+    query = f"SELECT user_id,name,email,role FROM userdata;"
     cursor.execute(query)
     data = cursor.fetchall()
     user_data = []
