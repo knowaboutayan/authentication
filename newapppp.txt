@@ -1,0 +1,63 @@
+from fastapi import FastAPI, Request, Depends, HTTPException, status
+from fastapi.responses import JSONResponse
+from db.dbconnection import DbConnection
+from controller import auth_controller
+from status_code.status import http_statuses
+from model.decorator import check_session
+from controller.feture_controller import fetch_user
+
+app = FastAPI()
+
+# Dependency to open a new database connection before each request
+async def get_db():
+    conn = DbConnection()
+    try:
+        yield conn.get_cursor()
+    finally:
+        conn.close_connection()
+
+@app.get("/")
+@check_session
+async def home():
+    return JSONResponse(content={
+        "text": "Welcome to FastAPI",
+        "status": 200
+    })
+
+@app.get("/all_user")
+@check_session
+async def all_user(cursor=Depends(get_db)):
+    return fetch_user(cursor=cursor)
+
+@app.post("/user/login")
+async def login(request: Request, cursor=Depends(get_db)):
+    data = await request.json()
+    username = data.get('username')
+    password = data.get('password')
+
+    if cursor is not None:
+        response = auth_controller.log_in(cursor=cursor, email=username, password=password)
+        return JSONResponse(content=response)
+    
+    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
+
+@app.post("/user/sign_up")
+async def signup(request: Request, cursor=Depends(get_db)):
+    data = await request.json()
+    name = data.get('name')
+    email = data.get('email')
+    password = data.get('password')
+    role = data.get('role')
+
+    if cursor is not None:
+        response = auth_controller.sign_up(cursor=cursor, name=name, email=email, password=password, role=role)
+        return JSONResponse(content=response)
+
+    raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Conflict")
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error": exc.detail},
+    )

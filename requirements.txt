@@ -1,6 +1,6 @@
 flask
 gunicorn
-dotenv-python
+python-dotenv
 mysql-connector-python
 PyJWT
 flask-cors
