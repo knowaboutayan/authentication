@@ -4,3 +4,4 @@ python-dotenv
 mysql-connector-python
 PyJWT
 flask-cors
+secure-smtplib
