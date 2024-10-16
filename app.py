@@ -6,6 +6,7 @@ from status_code.status import http_statuses
 from model.decorator import checkSession
 from controller.feture_controller import fetch_user
 from flask_cors import CORS
+from status_code.status import method_not_allowed,internal_server_error
 app = Flask(__name__)
 
 CORS(app)
@@ -20,7 +21,6 @@ def before_request():
 # Close the database connection after each request
 @app.teardown_request
 def teardown_request(exception):
-    
     if g.conn is not None:
         g.conn.close_connection()
 
@@ -65,7 +65,10 @@ def signup():
 
     return jsonify(**http_statuses[409])
 
-@app.errorhandler(400)
+@app.errorhandler(405)
 def handle_bad_request(error):
-    return jsonify({"error": "Bad request"}), 400
+    return method_not_allowed[405]
 
+@app.errorhandler(500)
+def server_error(err):
+    return internal_server_error[500]
