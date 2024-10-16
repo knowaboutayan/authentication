@@ -51,7 +51,7 @@ def login():
         return response
     return jsonify(**http_statuses[500])
 
-@app.route('/user/sign_up', methods=['POST'])
+@app.route('/user/signup', methods=['POST'])
 def signup():
     name = request.json.get('name')
     email = request.json.get('email')

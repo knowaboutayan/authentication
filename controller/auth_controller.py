@@ -29,6 +29,7 @@ def log_in(*,cursor,email,password):
 def sign_up(*,cursor,name,email,password,role = ''):
     response = auth.sign_up(cursor=cursor,name=name,email=email,password=password,role=role)
     if response:
+      
         return http_statuses[200]
     return http_statuses[409]
 

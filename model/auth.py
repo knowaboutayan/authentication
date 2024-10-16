@@ -1,6 +1,6 @@
 import datetime
 import random
-
+from model.mail.smtp.email import send_email
 def sign_up(*,cursor, name, email, password, role):
     # Generate a unique user_id
     user_id = f"{name.lower()[:2]}{random.randint(1000, 9999)}{datetime.datetime.now().microsecond}"
@@ -14,6 +14,18 @@ def sign_up(*,cursor, name, email, password, role):
         cursor.execute(query)
         cursor.execute('commit;')
         print("User registered successfully!")
+        with open('html/successful_reg.html','r') as file:
+                body = file.read()
+                
+
+        # Replace the placeholders with dynamic values
+        body = body.replace("{{user_id}}", user_id) \
+                        .replace("{{name}}", name) \
+                        .replace("{{email}}", email) \
+                        .replace("{{role}}", role)
+            
+        send_email(recipient_email=email,subject='Registration successful',body=body,body_type='html')
+
         return True
     except Exception as e:
         # Handle any exceptions that occur during the execution
@@ -36,6 +48,7 @@ def log_in(*,cursor,email,password):
                 "email":fetchedData[2],
                 "role":fetchedData[-1]    
             }
+            
             
             return userData
         print("No user found")
